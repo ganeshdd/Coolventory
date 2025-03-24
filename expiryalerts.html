@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expiry Alerts</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        table thead tr {
+            background-color: #333;
+            color: white;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        table th {
+            cursor: pointer;
+        }
+
+        /* Section Styling */
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header style="background: black;">
+            <img src="coolventory.png" alt="Coolventory Logo" class="logo">
+            <h1>Expiry Alerts</h1>
+        </header>
+
+        <!-- Top Menu -->
+        <nav class="menu">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="manageprod.html"><i class="fas fa-box"></i> Manage Products</a>
+            <a href="expiryalerts.html"><i class="fas fa-exclamation-triangle"></i> Expiry Alerts</a>
+            <a href="sales.html"><i class="fas fa-chart-bar"></i> Sales</a>
+            <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <!-- Expired Items Section -->
+            <section id="expired-items" class="section" style="max-width: 800px; width: 100%; text-align: center;">
+                <h2>Expired Items</h2>
+                <p id="expired-count">Expired Products: 0</p>
+                <table id="expired-items-table" style="width: 100%; margin: 0 auto; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                            <th>Expiry Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Expired items will be dynamically added -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="expiryalerts.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const expiredItems = JSON.parse(localStorage.getItem("expiredItems")) || [];
+            const tableBody = document.querySelector("#expired-items-table tbody");
+
+            function renderExpiredItems() {
+                tableBody.innerHTML = "";
+                expiredItems.forEach((item, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.category}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.expiry}</td>
+                        <td>
+                            <button onclick="checkExpiryInfo('${item.expiry}')">Check Expiry Info</button>
+                            <button onclick="deleteDumpItem(${index})">Delete as Dump</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                document.getElementById("expired-count").textContent = `Expired Products: ${expiredItems.length}`;
+            }
+
+            function checkExpiryInfo(expiryDate) {
+                const expiry = new Date(expiryDate);
+                const today = new Date();
+                const daysExpired = Math.ceil((today - expiry) / (1000 * 60 * 60 * 24));
+                if (daysExpired > 0) {
+                    alert(`This item has been expired for ${daysExpired} day(s).`);
+                } else if (daysExpired === 0) {
+                    alert("This item expires today!");
+                } else {
+                    alert(`This item will expire in ${Math.abs(daysExpired)} day(s).`);
+                }
+            }
+
+            function deleteDumpItem(index) {
+                if (confirm("Are you sure you want to delete this item as a dump?")) {
+                    expiredItems.splice(index, 1);
+                    localStorage.setItem("expiredItems", JSON.stringify(expiredItems));
+                    renderExpiredItems();
+                }
+            }
+
+            renderExpiredItems();
+        });
+    </script>
+</body>
+</html>
